@@ -14,15 +14,16 @@
 - [x] Docker — server, web, compose (Redis, OTel, Prometheus, Grafana)
 - [x] CI — GitHub Actions workflow
 
+- [x] Full project detail page (layers, elements, weights UI)
+- [x] Live generation page with WebSocket progress
+- [x] Auth UI (signup/signin pages)
+- [x] Settings page (project config editor)
+- [x] Preview/rarity utilities
+- [x] Metadata update/re-gen tools
+- [x] Advanced generation controls (shuffle, GIF export, text mode)
+
 ## Remaining
 
-- [ ] Full project detail page (layers, elements, weights UI)
-- [ ] Live generation page with WebSocket progress
-- [ ] Auth UI (signup/signin pages)
-- [ ] Settings page (project config editor)
-- [ ] Preview/rarity utilities
-- [ ] Metadata update/re-gen tools
-- [ ] Advanced generation controls (shuffle, GIF export, text mode)
 - [ ] Admin/user management
 - [ ] Production Docker build optimization
 - [ ] End-to-end tests

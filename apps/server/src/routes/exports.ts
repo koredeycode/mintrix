@@ -81,11 +81,27 @@ exportsRouter.get("/:jobId/metadata", async (c) => {
   return c.json([]);
 });
 
-exportsRouter.get("/:jobId/gif/:edition", async (c) => {
+exportsRouter.get("/:jobId/has-gifs", async (c) => {
   const jobId = c.req.param("jobId");
-  const edition = c.req.param("edition");
+  const gifsDir = path.join(BUILD_DIR, jobId, "gifs");
+  if (fs.existsSync(gifsDir)) {
+    const files = fs.readdirSync(gifsDir).filter((f) => f.endsWith(".gif"));
+    return c.json({ hasGifs: files.length > 0, count: files.length, files });
+  }
+  return c.json({ hasGifs: false, count: 0, files: [] });
+});
 
-  const filePath = getJobFilePath(jobId, "gifs", `${edition}.gif`);
+exportsRouter.get("/:jobId/gif/:name", async (c) => {
+  const jobId = c.req.param("jobId");
+  const nameParam = c.req.param("name");
+
+  let fileName = nameParam.endsWith(".gif") ? nameParam : `${nameParam}.gif`;
+  let filePath = getJobFilePath(jobId, "gifs", fileName);
+
+  if (!filePath && !nameParam.endsWith(".gif")) {
+    filePath = getJobFilePath(jobId, "gifs", `collection-reel-${nameParam}.gif`);
+  }
+
   if (!filePath) return c.json({ error: "not found" }, 404);
 
   const buffer = fs.readFileSync(filePath);
@@ -125,6 +141,18 @@ exportsRouter.get("/:jobId/download", async (c) => {
       const filePath = path.join(jsonDir, file);
       if (fs.statSync(filePath).isFile()) {
         jsonFolder?.file(file, fs.readFileSync(filePath));
+      }
+    }
+  }
+
+  // Add gifs animation folder if present
+  const gifsDir = path.join(targetDir, "gifs");
+  if (fs.existsSync(gifsDir)) {
+    const gifFolder = zip.folder("gifs");
+    for (const file of fs.readdirSync(gifsDir)) {
+      const filePath = path.join(gifsDir, file);
+      if (fs.statSync(filePath).isFile()) {
+        gifFolder?.file(file, fs.readFileSync(filePath));
       }
     }
   }

@@ -16,6 +16,7 @@ interface CustomSelectProps {
   direction?: "up" | "down";
   align?: "left" | "right";
   className?: string;
+  fullWidthPopover?: boolean;
 }
 
 export function CustomSelect({
@@ -26,6 +27,7 @@ export function CustomSelect({
   direction = "down",
   align = "left",
   className,
+  fullWidthPopover = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ export function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800 hover:border-indigo-500/80 rounded-xl text-xs font-mono font-medium text-slate-800 dark:text-slate-200 shadow-2xs focus-visible:ring-2 focus-visible:ring-indigo-500/50 focus:outline-none transition-all cursor-pointer"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800 hover:border-indigo-500/80 rounded-xl text-xs font-mono font-medium text-slate-800 dark:text-slate-200 shadow-2xs focus-visible:ring-2 focus-visible:ring-indigo-500/50 focus:outline-none transition-all cursor-pointer"
       >
         <span className="truncate">
           {selectedOption ? selectedOption.label : placeholder}
@@ -71,7 +73,8 @@ export function CustomSelect({
       {isOpen && (
         <div
           className={cn(
-            "absolute w-52 max-h-56 overflow-y-auto bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/90 rounded-xl shadow-2xl z-50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150",
+            "absolute max-h-56 overflow-y-auto bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/90 rounded-xl shadow-2xl z-50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150",
+            fullWidthPopover ? "w-full min-w-[200px]" : "w-52",
             align === "right" ? "right-0" : "left-0",
             direction === "up" ? "bottom-full mb-1.5" : "top-full mt-1.5"
           )}

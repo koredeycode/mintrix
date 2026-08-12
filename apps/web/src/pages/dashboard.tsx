@@ -2,6 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Input } from "@/components/ui/input";
 import { type Project, api } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -350,34 +351,38 @@ export function DashboardPage() {
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Target Blockchain
                   </label>
-                  <select
+                  <CustomSelect
                     value={network}
-                    onChange={(e) => setNetwork(e.target.value as "eth" | "sol")}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#0c0919] border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 text-xs font-medium focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="eth">Ethereum (ERC-721)</option>
-                    <option value="sol">Solana (Metaplex)</option>
-                  </select>
+                    options={[
+                      { value: "eth", label: "Ethereum (ERC-721)" },
+                      { value: "sol", label: "Solana (Metaplex)" },
+                    ]}
+                    onChange={(val) => setNetwork(val as "eth" | "sol")}
+                    fullWidthPopover
+                    className="w-full"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Canvas Resolution
                   </label>
-                  <select
+                  <CustomSelect
                     value={canvasWidth}
-                    onChange={(e) => {
-                      const val = Number.parseInt(e.target.value, 10);
-                      setCanvasWidth(val);
-                      setCanvasHeight(val);
+                    options={[
+                      { value: 512, label: "512 x 512 px" },
+                      { value: 1000, label: "1000 x 1000 px" },
+                      { value: 2048, label: "2048 x 2048 px" },
+                      { value: 4096, label: "4096 x 4096 px" },
+                    ]}
+                    onChange={(val) => {
+                      const num = Number(val);
+                      setCanvasWidth(num);
+                      setCanvasHeight(num);
                     }}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-[#0c0919] border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 text-xs font-mono focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="512">512 x 512 px</option>
-                    <option value="1000">1000 x 1000 px</option>
-                    <option value="2048">2048 x 2048 px</option>
-                    <option value="4096">4096 x 4096 px</option>
-                  </select>
+                    fullWidthPopover
+                    className="w-full"
+                  />
                 </div>
               </div>
 

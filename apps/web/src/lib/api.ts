@@ -48,6 +48,8 @@ export const api = {
   getElementImageUrl: (elementId: string) => `${BASE_URL}/layers/elements/${elementId}/file`,
   getOutputImageUrl: (jobId: string, edition: number) =>
     `${BASE_URL}/exports/${jobId}/image/${edition}`,
+  getOutputGifUrl: (jobId: string, editionOrName: number | string) =>
+    `${BASE_URL}/exports/${jobId}/gif/${editionOrName}`,
 };
 
 export interface Project {

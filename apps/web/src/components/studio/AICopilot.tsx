@@ -66,7 +66,7 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
       {/* Header */}
       <div className="p-4 bg-white dark:bg-[#15102c] border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-xs">
+          <div className="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center text-white shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <h3 className="font-extrabold text-xs tracking-wider uppercase text-slate-800 dark:text-slate-100">

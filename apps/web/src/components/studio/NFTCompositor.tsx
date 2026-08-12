@@ -293,7 +293,7 @@ export function NFTCompositor({
       <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-slate-200 dark:border-slate-800/80 shrink-0">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-indigo-500" />
-          <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-xs tracking-tight uppercase">
+          <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-xs tracking-tight">
             Viewport Compositor
           </h3>
           <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 text-[10px] font-mono font-bold border border-indigo-200 dark:border-indigo-800/80 flex items-center gap-1">
@@ -486,7 +486,7 @@ export function NFTCompositor({
 
         {/* Collapsible Trait Cards Grid */}
         {isStackOpen && (
-          <div className="mt-2 flex flex-wrap gap-2 max-h-24 overflow-y-auto pr-1">
+          <div className="mt-2 flex flex-wrap gap-2 max-h-24 overflow-y-auto pr-28 sm:pr-32">
             {selectedTraits.length === 0 ? (
               <span className="text-xs text-slate-400 italic py-1">Canvas is blank</span>
             ) : (

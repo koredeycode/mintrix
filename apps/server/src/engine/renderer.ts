@@ -73,4 +73,6 @@ export interface GifConfig {
   repeat: number;
   quality: number;
   delay: number;
+  imageCount?: number;
+  numberOfGifs?: number;
 }

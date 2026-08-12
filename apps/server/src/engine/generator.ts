@@ -1,3 +1,4 @@
+import { loadImage } from "@napi-rs/canvas";
 import { constructLayerToDna, createDna, filterDNAOptions, isDnaUnique } from "./dna.js";
 import type { SelectedElement } from "./dna.js";
 import { HashLipsGiffer } from "./giffer.js";
@@ -95,32 +96,12 @@ export async function generate(
 
         ctx.clearRect(0, 0, config.render.width, config.render.height);
 
-        let hashlipsGiffer: HashLipsGiffer | null = null;
-        if (config.gif.export) {
-          hashlipsGiffer = new HashLipsGiffer(
-            canvas,
-            ctx,
-            `${config.outputDir}/gifs/${abstractedIndexes[0]}.gif`,
-            config.gif.repeat,
-            config.gif.quality,
-            config.gif.delay,
-          );
-          hashlipsGiffer.start();
-        }
-
         if (config.background.generate) {
           drawBackground(ctx, config.background, config.render.width, config.render.height);
         }
 
         for (const renderObject of renderObjects) {
           drawElement(ctx, renderObject, config.render.width, config.render.height);
-          if (hashlipsGiffer) {
-            hashlipsGiffer.add();
-          }
-        }
-
-        if (hashlipsGiffer) {
-          hashlipsGiffer.stop();
         }
 
         const editionIndex = abstractedIndexes[0];
@@ -170,6 +151,50 @@ export async function generate(
     `${config.outputDir}/json/_metadata.json`,
     JSON.stringify(metadataList, null, 2),
   );
+
+  // Generate Collection Preview Reel GIF(s) if enabled
+  if (config.gif.export && metadataList.length > 0) {
+    const numGifs = Math.max(1, config.gif.numberOfGifs ?? 1);
+    const requestedImageCount = Math.max(2, config.gif.imageCount ?? 10);
+    const availableEditionIndices = metadataList
+      .map((m) => m.edition as number)
+      .filter((n) => typeof n === "number" && !Number.isNaN(n));
+
+    for (let reelIdx = 0; reelIdx < numGifs; reelIdx++) {
+      const count = Math.min(requestedImageCount, availableEditionIndices.length);
+      const sampledIndices: number[] = [];
+      const step = availableEditionIndices.length / count;
+      for (let i = 0; i < count; i++) {
+        const idx = Math.floor((i * step + reelIdx) % availableEditionIndices.length);
+        const edNum = availableEditionIndices[idx];
+        if (edNum !== undefined) {
+          sampledIndices.push(edNum);
+        }
+      }
+
+      const hashlipsGiffer = new HashLipsGiffer(
+        canvas,
+        ctx,
+        `${config.outputDir}/gifs/collection-reel-${reelIdx + 1}.gif`,
+        config.gif.repeat,
+        config.gif.quality,
+        config.gif.delay,
+      );
+      hashlipsGiffer.start();
+
+      for (const editionNum of sampledIndices) {
+        const imagePath = `${config.outputDir}/images/${editionNum}.png`;
+        if (fs.existsSync(imagePath)) {
+          const loadedImg = await loadImage(imagePath);
+          ctx.clearRect(0, 0, config.render.width, config.render.height);
+          ctx.drawImage(loadedImg, 0, 0, config.render.width, config.render.height);
+          hashlipsGiffer.add();
+        }
+      }
+
+      hashlipsGiffer.stop();
+    }
+  }
 
   return {
     metadataList,

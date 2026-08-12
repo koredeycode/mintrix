@@ -42,7 +42,22 @@ const UPLOADS_DIR = process.env.UPLOADS_DIR ?? "./data/uploads";
 const BUILD_DIR = process.env.BUILD_DIR ?? "./data/build";
 const INPUT_DIR = "./data/generation_input";
 
-async function runGenerationJob(jobId: string, projectId: string, totalEditions: number) {
+interface GenerationJobOptions {
+  gifExport?: boolean | undefined;
+  gifRepeat?: number | undefined;
+  gifQuality?: number | undefined;
+  gifDelay?: number | undefined;
+  gifImageCount?: number | undefined;
+  numberOfGifs?: number | undefined;
+  shuffleOrder?: boolean | undefined;
+}
+
+async function runGenerationJob(
+  jobId: string,
+  projectId: string,
+  totalEditions: number,
+  options?: GenerationJobOptions,
+) {
   try {
     const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
     if (!project) throw new Error("Project not found");
@@ -123,7 +138,7 @@ async function runGenerationJob(jobId: string, projectId: string, totalEditions:
     const rarityDelimiter = project.rarityDelim ?? "#";
     const dnaTolerance =
       !project.dnaTolerance || project.dnaTolerance <= 10 ? 10000 : project.dnaTolerance;
-    const shuffleOrder = project.shuffleOrder ?? false;
+    const shuffleOrder = options?.shuffleOrder ?? project.shuffleOrder ?? false;
     const canvasWidth = project.canvasWidth ?? 512;
     const canvasHeight = project.canvasHeight ?? 512;
     const network = project.network === "sol" ? "sol" : "eth";
@@ -154,10 +169,12 @@ async function runGenerationJob(jobId: string, projectId: string, totalEditions:
         extraMetadata: (project.extraMetadata as Record<string, unknown>) ?? {},
       },
       gif: {
-        export: false,
-        repeat: 0,
-        quality: 100,
-        delay: 500,
+        export: options?.gifExport ?? false,
+        repeat: options?.gifRepeat ?? 0,
+        quality: options?.gifQuality ?? 100,
+        delay: options?.gifDelay ?? 500,
+        imageCount: options?.gifImageCount ?? 10,
+        numberOfGifs: options?.numberOfGifs ?? 1,
       },
       layersBaseDir: stageBaseDir,
       outputDir: outputJobDir,
@@ -258,7 +275,15 @@ generationRouter.post("/start/:projectId", zValidator("json", startGenerationSch
   logger.info({ jobId, projectId, totalEditions }, "generation job queued");
 
   // Execute generation asynchronously
-  runGenerationJob(jobId, projectId, totalEditions);
+  runGenerationJob(jobId, projectId, totalEditions, {
+    gifExport: data.gifExport,
+    gifRepeat: data.gifRepeat,
+    gifQuality: data.gifQuality,
+    gifDelay: data.gifDelay,
+    gifImageCount: data.gifImageCount,
+    numberOfGifs: data.numberOfGifs,
+    shuffleOrder: data.shuffleOrder,
+  });
 
   return c.json({ jobId, status: "queued", totalEditions }, 202);
 });

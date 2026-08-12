@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs";
+import { writeFileSync } from "node:fs";
 import type { Canvas, SKRSContext2D as CanvasRenderingContext2D } from "@napi-rs/canvas";
 import GifEncoderModule from "gif-encoder-2";
 
@@ -38,6 +38,6 @@ export class HashLipsGiffer {
   stop(): void {
     this.gifEncoder.finish();
     const buffer = this.gifEncoder.out.getData();
-    writeFile(this.fileName, buffer, () => {});
+    writeFileSync(this.fileName, buffer);
   }
 }

@@ -11,6 +11,7 @@ import {
   Copy,
   Download,
   Eye,
+  Film,
   Filter,
   Grid,
   RefreshCw,
@@ -36,6 +37,10 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
   const [editions, setEditions] = useState<number[]>([]);
   const [allMetadata, setAllMetadata] = useState<NFTMetadata[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasGifs, setHasGifs] = useState(false);
+  const [gifFiles, setGifFiles] = useState<string[]>([]);
+  const [activeReelIndex, setActiveReelIndex] = useState<number>(0);
+  const [inspectorTab, setInspectorTab] = useState<"artworks" | "reels">("artworks");
   const [selectedEdition, setSelectedEdition] = useState<number | null>(null);
   const [activeMetadata, setActiveMetadata] = useState<NFTMetadata | null>(null);
   const [viewTab, setViewTab] = useState<"attributes" | "json">("attributes");
@@ -54,12 +59,19 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
   const fetchEditions = async (jId: string, silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const [editionsData, metaData] = await Promise.all([
+      const [editionsData, metaData, gifCheck] = await Promise.all([
         api.get<number[]>(`/exports/${jId}/editions`),
         api.get<NFTMetadata[]>(`/exports/${jId}/metadata`).catch(() => []),
+        api.get<{ hasGifs: boolean; count: number; files?: string[] }>(`/exports/${jId}/has-gifs`).catch(() => ({
+          hasGifs: false,
+          count: 0,
+          files: [],
+        })),
       ]);
       setEditions(editionsData);
       setAllMetadata(metaData);
+      setHasGifs(gifCheck.hasGifs);
+      setGifFiles(gifCheck.files || []);
 
       // Automatically navigate to latest page as new editions generate
       if (editionsData.length > prevLengthRef.current) {
@@ -70,6 +82,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
     } catch {
       setEditions([]);
       setAllMetadata([]);
+      setHasGifs(false);
     } finally {
       if (!silent) setLoading(false);
     }
@@ -233,23 +246,56 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Filter Toggle Button */}
-            <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-xs ${
-                isFilterOpen || activeFilterCount > 0
-                  ? "bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800"
-                  : "bg-white dark:bg-[#15102c] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-indigo-500/80"
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Filter Traits</span>
-              {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
+            {/* Output Panel Tab Switcher */}
+            <div className="flex bg-slate-100 dark:bg-[#090616] p-1 rounded-xl border border-slate-200 dark:border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setInspectorTab("artworks")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  inspectorTab === "artworks"
+                    ? "bg-white dark:bg-[#15102c] text-indigo-600 dark:text-indigo-400 shadow-2xs font-extrabold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <Grid className="w-3.5 h-3.5" />
+                <span>Artworks Grid</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInspectorTab("reels")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  inspectorTab === "reels"
+                    ? "bg-white dark:bg-[#15102c] text-indigo-600 dark:text-indigo-400 shadow-2xs font-extrabold"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <Film className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Collection Reels</span>
+                {hasGifs && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                )}
+              </button>
+            </div>
+
+            {inspectorTab === "artworks" && (
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  isFilterOpen || activeFilterCount > 0
+                    ? "bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800"
+                    : "bg-white dark:bg-[#15102c] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-indigo-500/80"
+                }`}
+              >
+                <Filter className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Filter Traits</span>
+                {activeFilterCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {jobId && editions.length > 0 && (
               <a
@@ -362,8 +408,92 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
 
         {/* Drawer Body */}
         <div className="flex-1 flex min-h-0 overflow-hidden relative">
-          {/* Main Gallery Grid Area */}
+          {/* Main Content View (Artworks Grid vs Collection Reels Tab) */}
           <div className="flex-1 p-4 overflow-y-auto min-w-0 bg-slate-50/50 dark:bg-[#0c0919]">
+            {inspectorTab === "reels" ? (
+              <div className="max-w-3xl mx-auto space-y-6 py-4">
+                {!jobId || !hasGifs || gifFiles.length === 0 ? (
+                  <div className="text-center py-20 text-slate-400 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-2">
+                    <Film className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-700" />
+                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      No Collection Preview Reels Exported
+                    </h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Enable &quot;Collection Preview Reel GIF Export&quot; in the Generation Engine Setup before starting a run to generate looping showcase GIFs.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Large Showcase Card */}
+                    <div className="p-6 bg-gradient-to-r from-indigo-950 via-slate-900 to-purple-950 border border-indigo-500/30 rounded-3xl shadow-2xl flex flex-col md:flex-row items-center gap-6">
+                      <div className="w-64 h-64 sm:w-72 sm:h-72 bg-slate-950 rounded-2xl overflow-hidden border-2 border-indigo-500/40 shadow-inner relative flex items-center justify-center shrink-0">
+                        <img
+                          src={api.getOutputGifUrl(jobId, gifFiles[activeReelIndex] || gifFiles[0]!)}
+                          alt="Collection Preview Reel"
+                          className="w-full h-full object-contain"
+                        />
+                        <span className="absolute top-2 right-2 px-2 py-1 text-xs font-mono font-extrabold bg-indigo-600 text-white rounded-lg shadow-md">
+                          REEL #{activeReelIndex + 1}
+                        </span>
+                      </div>
+
+                      <div className="flex-1 space-y-4 text-center md:text-left">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 font-mono">
+                            Animated Collection Showcase
+                          </span>
+                          <h3 className="font-extrabold text-xl text-white tracking-tight mt-1">
+                            Collection Preview Reel #{activeReelIndex + 1}
+                          </h3>
+                          <p className="text-xs text-slate-300 leading-relaxed mt-1">
+                            High-quality looping animated GIF slideshow generated from completed NFT artworks in this collection run. Ideal for teasers, marketplaces, and social media reels.
+                          </p>
+                        </div>
+
+                        {gifFiles.length > 1 && (
+                          <div className="space-y-1.5">
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Available Preview Reels
+                            </label>
+                            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                              {gifFiles.map((file, idx) => (
+                                <button
+                                  type="button"
+                                  key={file}
+                                  onClick={() => setActiveReelIndex(idx)}
+                                  className={`px-3 py-1.5 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer ${
+                                    activeReelIndex === idx
+                                      ? "bg-indigo-600 text-white border-indigo-400 shadow-md scale-105"
+                                      : "bg-slate-900/80 text-slate-300 border-slate-700 hover:border-slate-500"
+                                  }`}
+                                >
+                                  Reel {idx + 1}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
+                          <a
+                            href={api.getOutputGifUrl(jobId, gifFiles[activeReelIndex] || gifFiles[0]!)}
+                            download={`collection-reel-${activeReelIndex + 1}.gif`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-5 py-2.5 text-xs font-bold bg-white text-indigo-950 hover:bg-indigo-50 rounded-xl flex items-center gap-2 shadow-lg transition-all cursor-pointer"
+                          >
+                            <Download className="w-4 h-4 text-indigo-600" />
+                            <span>Download Reel GIF</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+
             {!jobId ? (
               <div className="text-center py-24 text-slate-400">
                 <Grid className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
@@ -436,6 +566,8 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                 })}
               </div>
             )}
+            </div>
+            )}
           </div>
 
           {/* Right Detail Inspector Panel */}
@@ -457,7 +589,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                 </div>
 
                 {/* High-res Image Preview */}
-                <div className="w-full aspect-square bg-slate-100 dark:bg-[#090616] border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex items-center justify-center shadow-inner">
+                <div className="w-full aspect-square bg-slate-100 dark:bg-[#090616] border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-between shadow-inner relative">
                   <img
                     src={api.getOutputImageUrl(jobId, selectedEdition)}
                     alt={`NFT #${selectedEdition}`}
@@ -546,17 +678,30 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                   )}
                 </div>
 
-                {/* Download Image Button */}
-                <a
-                  href={api.getOutputImageUrl(jobId, selectedEdition)}
-                  download={`${selectedEdition}.png`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-2 sleek-button text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 shadow-xs"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download Artwork #{selectedEdition}</span>
-                </a>
+                {/* Download Image & GIF Buttons */}
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={api.getOutputImageUrl(jobId, selectedEdition)}
+                    download={`${selectedEdition}.png`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2 sleek-button text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download PNG</span>
+                  </a>
+                  <a
+                    href={api.getOutputGifUrl(jobId, selectedEdition)}
+                    download={`${selectedEdition}.gif`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2 secondary-button text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 shadow-xs"
+                    title="Download animated GIF"
+                  >
+                    <Film className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Download GIF</span>
+                  </a>
+                </div>
               </div>
             </div>
           )}
