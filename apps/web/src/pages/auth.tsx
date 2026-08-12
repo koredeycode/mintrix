@@ -105,9 +105,9 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#120f21] text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 sm:p-6 md:p-10 font-sans selection:bg-indigo-500/30 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#080612] text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 sm:p-6 md:p-10 font-sans selection:bg-indigo-500/30 transition-colors duration-200">
       {/* Main Container Card matching reference design with Light/Dark compatibility */}
-      <div className="w-full max-w-5xl rounded-3xl bg-white dark:bg-[#1b172e] border border-slate-200 dark:border-slate-800/80 shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[620px] transition-colors duration-200">
+      <div className="w-full max-w-5xl rounded-3xl bg-white dark:bg-[#140f29] border border-slate-200 dark:border-slate-800/80 shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[620px] transition-colors duration-200">
         
         {/* Left Side: Rich Graphic Showcase Panel with Automatic Slide Headline Cycling */}
         <div className="lg:col-span-6 p-6 sm:p-8 relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-950 via-[#181236] to-purple-950 min-h-[360px] lg:min-h-full">
@@ -126,12 +126,7 @@ export function AuthPage() {
           {/* Top Row: Logo & Back to Website Link */}
           <div className="relative z-10 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <img
-                src="/logo.png"
-                alt="Mintrix Logo"
-                className="w-8 h-8 rounded-xl object-cover shadow-md group-hover:scale-105 transition-transform"
-              />
-              <span className="font-black text-xl tracking-tight text-white">
+              <span className="font-heading font-black text-xl tracking-tight text-white">
                 Mintrix
               </span>
             </Link>

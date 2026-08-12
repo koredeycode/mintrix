@@ -20,7 +20,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         sleek:
-          "bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white shadow-md hover:brightness-110 active:scale-[0.98]",
+          "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm hover:shadow active:scale-[0.98]",
         studio:
           "bg-[#15102c] border border-indigo-500/40 text-indigo-400 shadow-xs hover:border-indigo-500 hover:bg-indigo-950/60",
       },

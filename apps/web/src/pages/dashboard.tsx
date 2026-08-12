@@ -102,19 +102,18 @@ export function DashboardPage() {
   const totalElements = projects.reduce((acc, p) => acc + (p.elementCount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0c0919] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#080612] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200 font-sans">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
         {/* Workspace Banner */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#130f26] border border-slate-200 dark:border-slate-800 shadow-md relative overflow-hidden">
+        <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#140f29] border border-slate-200 dark:border-slate-800 shadow-md relative overflow-hidden">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
-                <img src="/logo.png" alt="Mintrix Logo" className="w-4 h-4 rounded object-cover" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold font-mono">
                 <span>Mintrix Studio Workspace</span>
               </div>
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              <h1 className="font-heading text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Generative NFT Studio
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed font-medium">
