@@ -62,9 +62,9 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
   };
 
   return (
-    <div className="studio-panel h-full flex flex-col bg-slate-50 dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 select-none overflow-hidden">
+    <div className="studio-panel h-full flex flex-col bg-slate-50 dark:bg-[#110d24] border-l border-slate-200 dark:border-slate-800/80 select-none overflow-hidden">
       {/* Header */}
-      <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+      <div className="p-4 bg-white dark:bg-[#15102c] border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-6 h-6 rounded-md bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
@@ -86,9 +86,9 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs bg-slate-50/50 dark:bg-[#0c0919]">
         {/* Welcome Banner Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs space-y-2">
+        <div className="bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/90 rounded-xl p-4 shadow-xs space-y-2">
           <div className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
             Copilot
           </div>
@@ -122,8 +122,8 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
             <div
               className={`p-3 rounded-xl max-w-[88%] leading-relaxed ${
                 msg.sender === "user"
-                  ? "bg-indigo-600 text-white rounded-br-none"
-                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-xs"
+                  ? "bg-indigo-600 text-white rounded-br-none shadow-xs"
+                  : "bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/90 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-xs"
               }`}
             >
               {msg.text}
@@ -133,8 +133,8 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
       </div>
 
       {/* Bottom Input Area */}
-      <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
-        <form onSubmit={handleSend} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 space-y-3 shadow-inner">
+      <div className="p-4 bg-white dark:bg-[#15102c] border-t border-slate-200 dark:border-slate-800/80 shrink-0">
+        <form onSubmit={handleSend} className="bg-slate-50 dark:bg-[#0c0919] border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 space-y-3 shadow-inner">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -166,7 +166,7 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
                 className={`p-1.5 rounded-xl border transition-colors ${
                   isRecording
                     ? "bg-red-50 dark:bg-red-950 text-red-600 border-red-200 dark:border-red-800 animate-pulse"
-                    : "bg-slate-200/60 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white"
+                    : "bg-slate-200/60 dark:bg-[#15102c] text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
                 title={isRecording ? "Stop recording" : "Voice input"}
               >
@@ -176,7 +176,7 @@ export function AICopilot({ projectName, onClose }: AICopilotProps) {
               <button
                 type="submit"
                 disabled={!input.trim()}
-                className="p-1.5 bg-slate-300 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 rounded-xl border border-slate-300/60 dark:border-slate-700 disabled:opacity-40 disabled:hover:bg-slate-300 dark:disabled:hover:bg-slate-800 transition-colors"
+                className="p-1.5 sleek-button rounded-xl text-white disabled:opacity-40 transition-colors"
                 title="Send message"
               >
                 <Send className="w-3.5 h-3.5" />

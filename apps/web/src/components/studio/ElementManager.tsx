@@ -1,16 +1,25 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CustomSelect } from "@/components/ui/CustomSelect";
+import { Input } from "@/components/ui/input";
 import { AlertModal, ConfirmModal, ElementLightboxModal } from "@/components/ui/Modal";
+import { RarityBadge } from "@/components/ui/RarityBadge";
 import { type Element, type Layer, api } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import {
   Check,
   Eye,
   Image as ImageIcon,
   Maximize2,
+  RefreshCw,
+  Scale,
   Sliders,
+  Sparkles,
   Trash2,
   UploadCloud,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+
 
 const BLEND_MODE_OPTIONS = [
   { value: "source-over", label: "source-over" },
@@ -48,6 +57,7 @@ export function ElementManager({
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [updatingWeights, setUpdatingWeights] = useState(false);
 
   // Modals state
   const [expandedElement, setExpandedElement] = useState<Element | null>(null);
@@ -126,6 +136,27 @@ export function ElementManager({
       onRefresh();
     } catch {
       // ignore
+    }
+  };
+
+  const handleEqualizeWeights = async (targetWeight = 10) => {
+    if (elements.length === 0) return;
+    setUpdatingWeights(true);
+    try {
+      await Promise.all(
+        elements.map((el) => api.patch(`/layers/elements/${el.id}/weight`, { weight: targetWeight }))
+      );
+      setElements((prev) => prev.map((el) => ({ ...el, weight: targetWeight })));
+      onRefresh();
+    } catch {
+      setAlertState({
+        isOpen: true,
+        title: "Update Failed",
+        message: "Failed to equalize trait weights",
+        type: "error",
+      });
+    } finally {
+      setUpdatingWeights(false);
     }
   };
 
@@ -220,13 +251,13 @@ export function ElementManager({
 
   if (!layer) {
     return (
-      <div className="studio-panel p-6 flex flex-col items-center justify-center h-full text-center border-r border-slate-200 dark:border-slate-800">
+      <div className="studio-panel p-6 flex flex-col items-center justify-center h-full text-center border-r border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#110d24]">
         <ImageIcon className="w-8 h-8 text-slate-300 dark:text-slate-700 mb-2" />
-        <h3 className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+        <h3 className="font-bold text-slate-700 dark:text-slate-300 text-xs">
           No Layer Selected
         </h3>
         <p className="text-slate-400 dark:text-slate-500 text-[11px] mt-1 max-w-xs">
-          Click a layer in the list to open its configuration & trait elements.
+          Click a layer in the navigator to view and manage trait weights.
         </p>
       </div>
     );
@@ -241,16 +272,16 @@ export function ElementManager({
   }));
 
   return (
-    <div className="studio-panel p-4 flex flex-col h-full border-r border-slate-200 dark:border-slate-800 select-none bg-white dark:bg-slate-900">
+    <div className="studio-panel p-4 flex flex-col h-full border-r border-slate-200 dark:border-slate-800/80 select-none bg-white dark:bg-[#110d24]">
       {/* Header & Custom Controls */}
-      <div className="mb-4 pb-3 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+      <div className="mb-3 pb-3 border-b border-slate-200 dark:border-slate-800/80 space-y-3 shrink-0">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
             <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 truncate">
               {layer.name}
             </h3>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-              {elements.length} elements • Total weight: {totalWeight}
+              {elements.length} traits • Total weight: {totalWeight}
             </span>
           </div>
 
@@ -263,8 +294,8 @@ export function ElementManager({
           </button>
         </div>
 
-        {/* Custom Styled Select Controls: Blend Mode & Layer Position */}
-        <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-2.5">
+        {/* Custom Select Controls: Blend Mode & Layer Position */}
+        <div className="p-2.5 bg-slate-50 dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/80 rounded-2xl space-y-2.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-600 dark:text-slate-400 font-medium text-[11px]">
               Blend Mode
@@ -289,6 +320,34 @@ export function ElementManager({
             </div>
           )}
         </div>
+
+        {/* Batch Weight Actions */}
+        {elements.length > 1 && (
+          <div className="flex items-center justify-between gap-2 pt-1 text-[11px]">
+            <span className="text-slate-500 font-medium text-[10px]">Batch Weight:</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                disabled={updatingWeights}
+                onClick={() => handleEqualizeWeights(1)}
+                className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-[#161130] text-slate-700 dark:text-slate-300 hover:text-indigo-500 border border-slate-200 dark:border-slate-800 text-[10px] font-mono transition-colors"
+                title="Reset all element weights to 1"
+              >
+                Reset to 1
+              </button>
+              <button
+                type="button"
+                disabled={updatingWeights}
+                onClick={() => handleEqualizeWeights(10)}
+                className="px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800/80 text-[10px] font-mono font-bold transition-colors flex items-center gap-1"
+                title="Equalize all element weights to 10"
+              >
+                <Scale className="w-3 h-3" />
+                Equalize (10)
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Upload Drag & Drop Zone */}
@@ -306,12 +365,12 @@ export function ElementManager({
         className={`mb-3 p-3 border-2 border-dashed rounded-2xl text-center transition-colors shrink-0 ${
           dragActive
             ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40"
-            : "border-slate-200 dark:border-slate-800 hover:border-indigo-400 bg-slate-50/50 dark:bg-slate-950/50"
+            : "border-slate-200 dark:border-slate-800/80 hover:border-indigo-400 bg-slate-50/50 dark:bg-[#15102c]"
         }`}
       >
         <UploadCloud className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
         <label className="cursor-pointer text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-          <span>{uploading ? "Uploading..." : "Upload Traits / PNGs"}</span>
+          <span>{uploading ? "Uploading Traits..." : "Upload PNG Traits"}</span>
           <input
             type="file"
             multiple
@@ -345,13 +404,13 @@ export function ElementManager({
                 className={`p-2.5 rounded-2xl border transition-all space-y-2 group cursor-pointer ${
                   isSelectedForPreview
                     ? "bg-indigo-50/80 dark:bg-indigo-950/50 border-indigo-500 shadow-xs"
-                    : "bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700"
+                    : "bg-slate-50/50 dark:bg-[#15102c] border-slate-200 dark:border-slate-800/80 hover:border-indigo-500/80"
                 }`}
                 onClick={() => setExpandedElement(el)}
               >
                 <div className="flex items-center gap-2.5">
                   {/* Thumbnail */}
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden flex items-center justify-center shrink-0 relative">
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#090616] border border-slate-200 dark:border-slate-800 overflow-hidden flex items-center justify-center shrink-0 relative">
                     <img
                       src={api.getElementImageUrl(el.id)}
                       alt={el.filename}
@@ -360,12 +419,14 @@ export function ElementManager({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h5 className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
-                      {cleanName}
-                    </h5>
-                    <span className="text-[10px] font-mono text-slate-500">
-                      Rarity: {weightPercent}% (wt: {el.weight})
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <h5 className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
+                        {cleanName}
+                      </h5>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-1.5">
+                      <RarityBadge percentage={weightPercent} showIcon={false} />
+                    </div>
                   </div>
 
                   <div
@@ -387,7 +448,7 @@ export function ElementManager({
                       className={`p-1.5 rounded-lg border transition-colors ${
                         isSelectedForPreview
                           ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-800 hover:text-indigo-600"
+                          : "bg-white dark:bg-[#161130] text-slate-500 border-slate-200 dark:border-slate-800 hover:text-indigo-600"
                       }`}
                       title="Preview on Canvas"
                     >
@@ -427,7 +488,7 @@ export function ElementManager({
                     onChange={(e) =>
                       handleWeightChange(el.id, Math.max(1, Number.parseInt(e.target.value, 10) || 1))
                     }
-                    className="w-10 px-1 py-0.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-[10px] font-mono text-center text-slate-800 dark:text-slate-200 focus:outline-none"
+                    className="w-10 px-1 py-0.5 bg-white dark:bg-[#0c0919] border border-slate-200 dark:border-slate-800 rounded text-[10px] font-mono text-center text-slate-800 dark:text-slate-200 focus:outline-none"
                   />
                 </div>
               </div>
@@ -469,3 +530,4 @@ export function ElementManager({
     </div>
   );
 }
+

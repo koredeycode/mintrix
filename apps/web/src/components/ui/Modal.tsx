@@ -1,10 +1,14 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { RarityBadge } from "@/components/ui/RarityBadge";
 import { type Element, api } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   Check,
   CheckCircle2,
   Eye,
-  Maximize2,
   Sliders,
   Trash2,
   X,
@@ -33,19 +37,28 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) onCancel();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#130f26] border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
                 variant === "danger"
-                  ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
-                  : "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
-              }`}
+                  ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
+                  : "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+              )}
             >
               <AlertCircle className="w-5 h-5" />
             </div>
@@ -63,22 +76,15 @@ export function ConfirmModal({
         </div>
 
         <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-          >
+          <Button variant="secondary" onClick={onCancel}>
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={variant === "danger" ? "destructive" : "default"}
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold text-white transition-colors shadow-xs ${
-              variant === "danger"
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-amber-600 hover:bg-amber-700"
-            }`}
           >
             {confirmText}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -101,20 +107,29 @@ export function AlertModal({
   type = "error",
   onClose,
 }: AlertModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#130f26] border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
         <div className="flex items-start gap-3">
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            className={cn(
+              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border",
               type === "error"
-                ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
                 : type === "success"
-                  ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                  : "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
-            }`}
+                  ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                  : "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800"
+            )}
           >
             {type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
           </div>
@@ -125,12 +140,9 @@ export function AlertModal({
         </div>
 
         <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800/80">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors"
-          >
+          <Button variant="sleek" onClick={onClose}>
             OK
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -167,6 +179,14 @@ export function ElementLightboxModal({
     if (element) setWeight(element.weight || 1);
   }, [element]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !element) return null;
 
   const weightPercent =
@@ -174,28 +194,24 @@ export function ElementLightboxModal({
   const cleanName = element.filename.replace(/^.*?-/, "").replace(/\.[^/.]+$/, "");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 select-none">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200 select-none">
+      <div className="bg-white dark:bg-[#130f26] border border-slate-200 dark:border-slate-800/90 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 overflow-hidden relative">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-200 dark:border-indigo-800/80">
-              {layerName}
-            </span>
-            <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 truncate max-w-[280px]">
+            <Badge variant="default">{layerName}</Badge>
+            <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 truncate max-w-[240px]">
               {cleanName}
             </h3>
+            <RarityBadge percentage={weightPercent} />
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={onClose}>
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Image Preview Box */}
-        <div className="w-full aspect-square max-h-[320px] rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden p-4 shadow-inner relative group">
+        <div className="w-full aspect-square max-h-[320px] rounded-2xl bg-slate-100 dark:bg-[#090616] border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden p-4 shadow-inner relative group">
           <img
             src={api.getElementImageUrl(element.id)}
             alt={element.filename}
@@ -204,7 +220,7 @@ export function ElementLightboxModal({
         </div>
 
         {/* Metadata Details & Weight Slider */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-3">
+        <div className="p-4 bg-slate-50 dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/80 rounded-2xl space-y-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
               <Sliders className="w-4 h-4 text-indigo-500" />
@@ -228,7 +244,7 @@ export function ElementLightboxModal({
               }}
               className="flex-1 accent-indigo-600 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
             />
-            <input
+            <Input
               type="number"
               min="1"
               max="100"
@@ -238,7 +254,7 @@ export function ElementLightboxModal({
                 setWeight(w);
                 onWeightChange?.(element.id, w);
               }}
-              className="w-14 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-mono font-bold text-center text-slate-900 dark:text-slate-100 focus:outline-none"
+              className="w-14 font-mono font-bold text-center"
             />
           </div>
 
@@ -249,31 +265,27 @@ export function ElementLightboxModal({
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-2">
-          <button
+          <Button
+            variant="destructive"
             onClick={() => {
               onDelete?.(element.id);
               onClose();
             }}
-            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 border border-red-200 dark:border-red-800/80 transition-colors flex items-center gap-1.5"
           >
             <Trash2 className="w-4 h-4" />
             <span>Delete Trait</span>
-          </button>
+          </Button>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant={isSelectedForPreview ? "secondary" : "default"}
               onClick={() => {
                 onSelectForPreview?.(element.id);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-xs ${
-                isSelectedForPreview
-                  ? "bg-emerald-600 text-white border-emerald-600"
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600"
-              }`}
             >
               {isSelectedForPreview ? (
                 <>
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 text-emerald-500" />
                   <span>Previewing on Canvas</span>
                 </>
               ) : (
@@ -282,10 +294,12 @@ export function ElementLightboxModal({
                   <span>Preview on Canvas</span>
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+

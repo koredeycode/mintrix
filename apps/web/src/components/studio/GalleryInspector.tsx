@@ -2,11 +2,13 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 import { type NFTMetadata, api } from "@/lib/api";
 import {
   Archive,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Copy,
   Download,
   Eye,
   Filter,
@@ -37,6 +39,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
   const [selectedEdition, setSelectedEdition] = useState<number | null>(null);
   const [activeMetadata, setActiveMetadata] = useState<NFTMetadata | null>(null);
   const [viewTab, setViewTab] = useState<"attributes" | "json">("attributes");
+  const [copiedJson, setCopiedJson] = useState(false);
 
   // Trait Filtering state
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
@@ -71,6 +74,14 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
       if (!silent) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!jobId || !isOpen) {
@@ -178,6 +189,13 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
     }
   };
 
+  const copyJsonToClipboard = () => {
+    if (!activeMetadata) return;
+    navigator.clipboard.writeText(JSON.stringify(activeMetadata, null, 2));
+    setCopiedJson(true);
+    setTimeout(() => setCopiedJson(false), 2000);
+  };
+
   if (!isOpen) return null;
 
   const totalPages = Math.max(1, Math.ceil(filteredEditions.length / pageSize));
@@ -191,19 +209,19 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 transition-opacity"
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 transition-opacity"
       />
 
       {/* Drawer Container */}
-      <div className="fixed inset-y-0 right-0 w-full max-w-5xl bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 flex flex-col transition-transform duration-300 select-none">
+      <div className="fixed inset-y-0 right-0 w-full max-w-5xl bg-white dark:bg-[#110d24] border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 flex flex-col transition-transform duration-300 select-none">
         {/* Drawer Header */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/90 dark:bg-slate-950/90 shrink-0">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/90 dark:bg-[#0c0919]/90 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-center font-bold">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-sm tracking-tight">
+              <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-sm tracking-tight uppercase">
                 Output Gallery Inspector
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
@@ -220,8 +238,8 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-colors shadow-xs ${
                 isFilterOpen || activeFilterCount > 0
-                  ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800"
-                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-indigo-300"
+                  ? "bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800"
+                  : "bg-white dark:bg-[#15102c] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-indigo-500/80"
               }`}
             >
               <Filter className="w-3.5 h-3.5 text-indigo-500" />
@@ -251,7 +269,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                 className="p-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1 transition-colors"
                 title="Refresh Gallery"
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-600" : ""}`} />
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-500" : ""}`} />
               </button>
             )}
 
@@ -266,7 +284,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
 
         {/* Expandable Trait Filter Bar / Drawer */}
         {isFilterOpen && (
-          <div className="p-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0 animate-in slide-in-from-top-2 duration-150">
+          <div className="p-3 bg-slate-50 dark:bg-[#0c0919] border-b border-slate-200 dark:border-slate-800/80 space-y-2 shrink-0 animate-in slide-in-from-top-2 duration-150">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Filter Collection by Traits
@@ -345,7 +363,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
         {/* Drawer Body */}
         <div className="flex-1 flex min-h-0 overflow-hidden relative">
           {/* Main Gallery Grid Area */}
-          <div className="flex-1 p-4 overflow-y-auto min-w-0">
+          <div className="flex-1 p-4 overflow-y-auto min-w-0 bg-slate-50/50 dark:bg-[#0c0919]">
             {!jobId ? (
               <div className="text-center py-24 text-slate-400">
                 <Grid className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
@@ -391,10 +409,10 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                       className={`group cursor-pointer rounded-2xl border overflow-hidden transition-all shadow-xs ${
                         isSelected
                           ? "border-2 border-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/50 shadow-md scale-[1.02]"
-                          : "bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-md"
+                          : "bg-white dark:bg-[#15102c] border-slate-200 dark:border-slate-800/80 hover:border-indigo-500/80 hover:shadow-md"
                       }`}
                     >
-                      <div className="aspect-square bg-slate-100 dark:bg-slate-950 p-2 flex items-center justify-center relative">
+                      <div className="aspect-square bg-slate-100 dark:bg-[#090616] p-2 flex items-center justify-center relative">
                         <img
                           src={api.getOutputImageUrl(jobId, edition)}
                           alt={`NFT #${edition}`}
@@ -422,10 +440,10 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
 
           {/* Right Detail Inspector Panel */}
           {jobId && selectedEdition !== null && activeMetadata && (
-            <div className="w-80 sm:w-96 h-full p-4 overflow-y-auto bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 animate-in slide-in-from-right duration-200 shadow-xl z-10">
+            <div className="w-80 sm:w-96 h-full p-4 overflow-y-auto bg-white dark:bg-[#110d24] border-l border-slate-200 dark:border-slate-800/80 flex flex-col justify-between shrink-0 animate-in slide-in-from-right duration-200 shadow-xl z-10">
               <div className="space-y-4">
                 {/* Header with Close Detail View button */}
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3">
                   <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
                     Artwork Inspector
                   </span>
@@ -439,7 +457,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                 </div>
 
                 {/* High-res Image Preview */}
-                <div className="w-full aspect-square bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex items-center justify-center shadow-inner">
+                <div className="w-full aspect-square bg-slate-100 dark:bg-[#090616] border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex items-center justify-center shadow-inner">
                   <img
                     src={api.getOutputImageUrl(jobId, selectedEdition)}
                     alt={`NFT #${selectedEdition}`}
@@ -460,7 +478,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                     {activeMetadata.description}
                   </p>
-                  <div className="mt-2.5 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] font-mono text-slate-500 truncate">
+                  <div className="mt-2.5 p-2 bg-slate-50 dark:bg-[#15102c] rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] font-mono text-slate-500 truncate">
                     DNA:{" "}
                     <span className="text-indigo-600 dark:text-indigo-400 font-bold">
                       {activeMetadata.dna}
@@ -470,27 +488,39 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
 
                 {/* Attributes & JSON Tabs */}
                 <div className="space-y-2">
-                  <div className="flex border-b border-slate-200 dark:border-slate-800 text-xs font-semibold">
-                    <button
-                      onClick={() => setViewTab("attributes")}
-                      className={`pb-1.5 mr-4 transition-colors ${
-                        viewTab === "attributes"
-                          ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                          : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                      }`}
-                    >
-                      Attributes ({activeMetadata.attributes?.length || 0})
-                    </button>
-                    <button
-                      onClick={() => setViewTab("json")}
-                      className={`pb-1.5 transition-colors ${
-                        viewTab === "json"
-                          ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                          : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                      }`}
-                    >
-                      JSON
-                    </button>
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 text-xs font-semibold">
+                    <div className="flex">
+                      <button
+                        onClick={() => setViewTab("attributes")}
+                        className={`pb-1.5 mr-4 transition-colors ${
+                          viewTab === "attributes"
+                            ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                            : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                        }`}
+                      >
+                        Attributes ({activeMetadata.attributes?.length || 0})
+                      </button>
+                      <button
+                        onClick={() => setViewTab("json")}
+                        className={`pb-1.5 transition-colors ${
+                          viewTab === "json"
+                            ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                            : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                        }`}
+                      >
+                        JSON
+                      </button>
+                    </div>
+
+                    {viewTab === "json" && (
+                      <button
+                        onClick={copyJsonToClipboard}
+                        className="text-[10px] text-indigo-500 hover:text-indigo-400 flex items-center gap-1 font-mono mb-1"
+                      >
+                        {copiedJson ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedJson ? "Copied" : "Copy JSON"}</span>
+                      </button>
+                    )}
                   </div>
 
                   {viewTab === "attributes" ? (
@@ -498,7 +528,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                       {activeMetadata.attributes?.map((attr, idx) => (
                         <div
                           key={idx}
-                          className="p-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
+                          className="p-2 bg-slate-50 dark:bg-[#15102c] border border-slate-200 dark:border-slate-800 rounded-xl text-xs"
                         >
                           <div className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">
                             {attr.trait_type}
@@ -510,7 +540,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
                       ))}
                     </div>
                   ) : (
-                    <pre className="p-3 bg-slate-950 border border-slate-800 rounded-xl text-[10px] font-mono text-emerald-400 max-h-48 overflow-y-auto">
+                    <pre className="p-3 bg-[#090616] border border-slate-800 rounded-xl text-[10px] font-mono text-emerald-400 max-h-48 overflow-y-auto selection:bg-emerald-500/20">
                       {JSON.stringify(activeMetadata, null, 2)}
                     </pre>
                   )}
@@ -533,7 +563,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
         </div>
 
         {/* Footer Pagination Toolbar */}
-        <div className="p-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/90 flex flex-wrap items-center justify-between gap-3 shrink-0 relative z-30">
+        <div className="p-3.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/90 dark:bg-[#0c0919]/90 flex flex-wrap items-center justify-between gap-3 shrink-0 relative z-30">
           {/* Upward Dropdown for Page Size */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500 font-medium hidden sm:inline">Per page:</span>
@@ -553,7 +583,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
             <button
               onClick={() => setCurrentPage(1)}
               disabled={validPage <= 1}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#15102c] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
               title="First Page"
             >
               <ChevronsLeft className="w-4 h-4" />
@@ -561,20 +591,20 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={validPage <= 1}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#15102c] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
               title="Previous Page"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <span className="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 font-bold">
+            <span className="px-2 py-1 bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 font-bold">
               {validPage} / {totalPages}
             </span>
 
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={validPage >= totalPages}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#15102c] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
               title="Next Page"
             >
               <ChevronRight className="w-4 h-4" />
@@ -582,7 +612,7 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
             <button
               onClick={() => setCurrentPage(totalPages)}
               disabled={validPage >= totalPages}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#15102c] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
               title="Last Page"
             >
               <ChevronsRight className="w-4 h-4" />
@@ -593,3 +623,4 @@ export function GalleryInspector({ jobId, isOpen, onClose }: GalleryInspectorPro
     </>
   );
 }
+

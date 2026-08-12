@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -24,7 +25,7 @@ export function CustomSelect({
   placeholder = "Select...",
   direction = "down",
   align = "left",
-  className = "",
+  className,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,34 +38,43 @@ export function CustomSelect({
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (
-    <div ref={containerRef} className={`relative inline-block text-left ${className}`}>
+    <div ref={containerRef} className={cn("relative inline-block text-left", className)}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 rounded-xl text-xs font-mono font-medium text-slate-800 dark:text-slate-200 shadow-xs focus:outline-none transition-colors cursor-pointer"
+        className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800 hover:border-indigo-500/80 rounded-xl text-xs font-mono font-medium text-slate-800 dark:text-slate-200 shadow-2xs focus-visible:ring-2 focus-visible:ring-indigo-500/50 focus:outline-none transition-all cursor-pointer"
       >
         <span className="truncate">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? "rotate-180 text-indigo-500" : ""
-          }`}
+          className={cn(
+            "w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200",
+            isOpen && "rotate-180 text-indigo-500"
+          )}
         />
       </button>
 
       {isOpen && (
         <div
-          className={`absolute w-52 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 ${
-            align === "right" ? "right-0" : "left-0"
-          } ${
+          className={cn(
+            "absolute w-52 max-h-56 overflow-y-auto bg-white dark:bg-[#15102c] border border-slate-200 dark:border-slate-800/90 rounded-xl shadow-2xl z-50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150",
+            align === "right" ? "right-0" : "left-0",
             direction === "up" ? "bottom-full mb-1.5" : "top-full mt-1.5"
-          }`}
+          )}
         >
           {options.map((opt) => {
             const isSelected = opt.value === value;
@@ -76,11 +86,12 @@ export function CustomSelect({
                   onChange(opt.value);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer ${
+                className={cn(
+                  "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-mono text-left transition-colors cursor-pointer",
                   isSelected
-                    ? "bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 font-bold"
-                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
+                    ? "bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800/60"
+                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1b1538]"
+                )}
               >
                 <div className="min-w-0">
                   <div className="truncate">{opt.label}</div>
@@ -99,3 +110,5 @@ export function CustomSelect({
     </div>
   );
 }
+
+
